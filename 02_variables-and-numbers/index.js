@@ -23,3 +23,25 @@ function sideLength(x1, y1, x2, y2) {
 console.log(
   sideLength(x1, y1, x4, y4) * sideLength(x1, y1, x3, y3)
 );
+
+
+// task2
+let precision = 3;
+let a = 13.890123;
+let b = 2.891564;
+
+function getFraction(a) {
+  return Math.round(
+    a % 1 * Math.pow(10, precision))
+}
+
+let firstFraction = getFraction(a);
+let secondFraction = getFraction(b);
+
+console.log('Дробные части:', firstFraction, ',', secondFraction);
+console.log('Дробная часть первого больше второго:', firstFraction > secondFraction);
+console.log('Дробная часть первого меньше второго:', firstFraction < secondFraction);
+console.log('Дробная часть первого больше либо равна второго:', firstFraction >= secondFraction);
+console.log('Дробная часть первого меньше либо равна второго:', firstFraction <= secondFraction);
+console.log('Дробные части равны:', firstFraction === secondFraction);
+console.log('Дробные части не равны:', firstFraction !== secondFraction);
