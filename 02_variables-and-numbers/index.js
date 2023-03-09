@@ -45,3 +45,26 @@ console.log('Дробная часть первого больше либо ра
 console.log('Дробная часть первого меньше либо равна второго:', firstFraction <= secondFraction);
 console.log('Дробные части равны:', firstFraction === secondFraction);
 console.log('Дробные части не равны:', firstFraction !== secondFraction);
+
+// task3
+let n = -3;
+let m = -10;
+
+let rang = Math.abs(m - n);
+
+let numberInRange1 = Math.round(Math.random() * rang);
+let numberInRange2 = Math.round(Math.random() * rang);
+
+let min = Math.min(n, m);
+
+firstRandom = min + numberInRange1;
+secondRandom = min + numberInRange2;
+
+console.log('Случайные числа:', firstRandom, ',', secondRandom);
+console.log('Первое больше второго:', firstRandom > secondRandom);
+console.log('Первое меньше второго:', firstRandom < secondRandom);
+console.log('Первое больше либо равно второму:', firstRandom >= secondRandom);
+console.log('Первое меньше либо равно второму:', firstRandom <= secondRandom);
+console.log('Числа равны:', firstRandom === secondRandom);
+console.log('Числа не равны:', firstRandom !== secondRandom);
+
