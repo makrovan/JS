@@ -44,7 +44,7 @@
 
   function createCards(container, pairs, filedSize = 4) {
     let id = 0;
-    let clickedBtnId = null;
+    const clickedBtnId = [];
 
     for (let lineNumber = 0; lineNumber < filedSize; lineNumber++) {
       const row = document.createElement('div');
@@ -62,23 +62,22 @@
         button.setAttribute('id', id++);
         button.style.width = '100%';
         button.style.height = '100%';
+        button.style.color = 'blue';
+        button.style.fontSize = '1.5em';
         button.addEventListener('click', () => {
-          if (clickedBtnId === null) {
-            clickedBtnId = button.id;
-            button.textContent = pairs[button.id];
-            button.disabled = true;
+          button.textContent = pairs[button.id];
+          button.disabled = true;
+          if (!clickedBtnId.length) {
+            clickedBtnId.push(button.id);
           } else {
-            button.textContent = pairs[button.id];
-            button.disabled = true;
+            const pushedId = clickedBtnId.pop();
             setTimeout(() => {
-              if (pairs[clickedBtnId] !== pairs[button.id]) {
+              if (pairs[pushedId] !== pairs[button.id]) {
                 button.textContent = '';
                 button.disabled = false;
-
-                document.getElementById(clickedBtnId).textContent = '';
-                document.getElementById(clickedBtnId).disabled = false;
+                document.getElementById(pushedId).textContent = '';
+                document.getElementById(pushedId).disabled = false;
               }
-              clickedBtnId = null;
             }, 1000);
           }
         });
@@ -86,6 +85,8 @@
       }
     }
   }
+
+  let getSizeFunc;
 
   // Этап 3. Используйте две созданные функции для создания массива перемешанными номерами.
   // На основе этого массива вы можете создать DOM-элементы карточек.
@@ -101,10 +102,11 @@
     setTimeout(() => {
       clearDOM();
       console.log('время вышло...');
+      getSizeFunc();
     }, 60000);
   }
 
-  function getSize(container) {
+  function getSize(container = document.getElementById('pairs-app')) {
     const form = document.createElement('form');
     const input = document.createElement('input');
     input.type = 'number';
@@ -137,7 +139,11 @@
     form.append(input);
     form.append(buttonWrapper);
     container.append(form);
+
+    getSizeFunc = () => {
+      getSize();
+    };
   }
 
-  document.addEventListener('DOMContentLoader', getSize(document.getElementById('pairs-app')));
+  document.addEventListener('DOMContentLoader', getSize());
 })();
