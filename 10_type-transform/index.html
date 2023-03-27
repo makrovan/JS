@@ -1,17 +1,150 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Список студентов</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+    integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"
+    integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct"
+    crossorigin="anonymous"></script>
+  <script defer src="main.js"></script>
 
-    <script src="main.js"></script>
+  <title>Список студентов</title>
 </head>
 
 <body>
-    <!-- Этап 1. Создайте верстку элементов, которые будут статичны (неизменны).  -->
+  <div id="students" class="container">
+    <label for="inputStudentForm" class="col-form-label pl-0">Добавить студента:</label>
+    <form id="inputStudentForm" class="mb-3">
+      <div class="form-group row">
+        <label for="studentName" class="col-sm-5 col-form-label">Имя студента</label>
+        <div class="col-sm-7">
+          <input type="text" class="form-control" id="studentName" placeholder="Иван" required>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="studentSurname" class="col-sm-5 col-form-label">Фамилия студента</label>
+        <div class="col-sm-7">
+          <input type="text" class="form-control" id="studentSurname" placeholder="Иванов" required>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="studentMiddleName" class="col-sm-5 col-form-label">Отчество студента</label>
+        <div class="col-sm-7">
+          <input type="text" class="form-control" id="studentMiddleName" placeholder="Иванович"
+            required></div>
+      </div>
+      <div class="form-group row">
+        <label for="studentBirthday" class="col-sm-5 col-form-label">Дата рождения студента</label>
+        <div class="col-sm-7">
+          <input type="date" class="form-control" id="studentBirthday" required></div>
+      </div>
+      <div class="form-group row">
+        <label for="startEducation" class="col-sm-5 col-form-label">Год начала обучения</label>
+        <div class="col-sm-7">
+          <input type="number" class="form-control" id="startEducation" placeholder="2000" required>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="direction" class="col-sm-5 col-form-label">Факультет</label>
+        <div class="col-sm-7">
+          <input type="text" class="form-control" id="direction" placeholder="Филология" required>
+        </div>
+      </div>
+      <small id="studentHint" class="form-text text-muted text-center invisible">Все поля должны быть заполнены</small>
+      <button id="addStudentBtn" type="submit" class="btn btn-lg btn-outline-secondary d-block mx-auto">Ввод</button>
+    </form>
+
+    <h2 class="text-center">Результирующая таблица</h2>
+
+    <label for="filterForm" class="col-form-label pl-0">Фильтровать по:</label>
+    <form id="filterForm">
+      <div class="form-group row">
+        <label for="inputNameFilter" class="col-sm-5 col-form-label col-form-label-sm">Ф.И.О.</label>
+        <div class="col-sm-7">
+          <input type="text" class="form-control form-control-sm" id="inputNameFilter" placeholder="Введите ФИО">
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="inputDirectionFilter" class="col-sm-5 col-form-label col-form-label-sm">Факультет</label>
+        <div class="col-sm-7">
+          <input type="text" class="form-control form-control-sm" id="inputDirectionFilter"
+            placeholder="Введите факультет">
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="inputStartEducationFilter" class="col-sm-5 col-form-label col-form-label-sm">Год начала
+          обучения</label>
+        <div class="col-sm-7">
+          <input type="number" class="form-control form-control-sm" id="inputStartEducationFilter" placeholder="2000"
+            min="2000">
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="inputEndEducationFilter" class="col-sm-5 col-form-label col-form-label-sm">Год окончания
+          обучения</label>
+        <div class="col-sm-7">
+          <input type="number" class="form-control form-control-sm" id="inputEndEducationFilter" placeholder="2004"
+            min="2004">
+        </div>
+      </div>
+      <div class="form-group row">
+        <div class="col-sm-12">
+          <div class="btn-toolbar flex-sm-row-reverse" role="toolbar">
+            <button type="submit" class="btn btn-outline-secondary btn-sm mr-5 mr-sm-0 ml-sm-5"
+              id="setFilterBtn" disabled>Применить</button>
+            <button type="reset" class="btn btn-outline-secondary btn-sm" id="clearFilterBtn" disabled>Сбросить</button>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">
+            <button id="nameBtn" type="button" class="btn btn-link btn-sm text-secondary">Ф.И.О.</button>
+          </th>
+          <th scope="col">
+            <button id="directionBtn" type="button" class="btn btn-link btn-sm text-secondary">Факультет</button>
+          </th>
+          <th scope="col">
+            <button id="birthdayBtn" type="button" class="btn btn-link btn-sm text-secondary">Дата рождения</button>
+          </th>
+          <th scope="col">
+            <button id="startEducationBtn" type="button" class="btn btn-link btn-sm text-secondary">Годы
+              обучения</button>
+          </th>
+        </tr>
+      </thead>
+      <tbody id="studentTableBody">
+        <!-- <tr>
+                <th scope="row">1</th>
+                <td>Mark</td>
+                <td>Otto</td>
+                <td>@mdo</td>
+              </tr>
+              <tr>
+                <th scope="row">2</th>
+                <td>Jacob</td>
+                <td>Thornton</td>
+                <td>@fat</td>
+              </tr>
+              <tr>
+                <th scope="row">3</th>
+                <td>Larry</td>
+                <td>the Bird</td>
+                <td>@twitter</td>
+              </tr> -->
+      </tbody>
+    </table>
+  </div>
 </body>
 
 </html>
