@@ -1,26 +1,300 @@
-// Этап 1. В HTML файле создайте верстку элементов, которые будут статичны(неизменны).
+(() => {
+  const studentsList = [];
 
-// Этап 2. Создайте массив объектов студентов.Добавьте в него объекты студентов, например 5 студентов.
+  // const student = {
+  //   studentName: nameField.value.trim(),
+  //   surname: surnameField.value.trim(),
+  //   middleName: middleNameField.value.trim(),
+  //   birthDate: birthday,
+  //   startEducationDate: startEducation,
+  //   direction: directionField.value.trim(),
+  // };
 
-const studentsList = [
-    // Добавьте сюда объекты студентов
-]
+  function getAge(birthday) {
+    const today = new Date();
+    let years = today.getFullYear() - birthday.getFullYear();
+    const currentBirthday = new Date(today.getFullYear(), birthday.getMonth(), birthday.getDate());
+    years = currentBirthday > today ? --years : years;
+    return years;
+  }
 
-// Этап 3. Создайте функцию вывода одного студента в таблицу, по аналогии с тем, как вы делали вывод одного дела в модуле 8. Функция должна вернуть html элемент с информацией и пользователе.У функции должен быть один аргумент - объект студента.
+  function getEducationYearsStr(startEducation) {
+    // const educationYears = getAge(startEducation);
+    const today = new Date();
+    let years = today.getFullYear() - startEducation.getFullYear();
+    const st = new Date(today.getFullYear(), startEducation.getMonth(), startEducation.getDate());
+    years = st > today ? years : years++;
+    let educationYearsStr = `${startEducation.getFullYear()} - ${startEducation.getFullYear() + 4}`;
+    if (years > 4) {
+      educationYearsStr = `${educationYearsStr} (закончил)`;
+    } else {
+      educationYearsStr = `${educationYearsStr} (${years} курс)`;
+    }
+    return educationYearsStr;
+  }
 
-function getStudentItem(studentObj) {
+  function getStudentItem(studentObj) {
+    const studentTbl = document.getElementById('studentTableBody');
+    const tblRow = document.createElement('tr');
 
-}
+    const studentNameInTbl = document.createElement('td');
+    studentNameInTbl.textContent = `${studentObj.surname} ${studentObj.studentName} ${studentObj.middleName}`;
+    const directionInTbl = document.createElement('td');
+    directionInTbl.textContent = studentObj.direction;
+    const age = getAge(studentObj.birthDate);
+    const birthdayInTbl = document.createElement('td');
+    birthdayInTbl.textContent = `${studentObj.birthDate.toLocaleDateString()} (${age} лет)`;
+    const educationYearsInTbl = document.createElement('td');
+    educationYearsInTbl.textContent = getEducationYearsStr(studentObj.startEducationDate);
 
-// Этап 4. Создайте функцию отрисовки всех студентов. Аргументом функции будет массив студентов.Функция должна использовать ранее созданную функцию создания одной записи для студента.Цикл поможет вам создать список студентов.Каждый раз при изменении списка студента вы будете вызывать эту функцию для отрисовки таблицы.
+    tblRow.append(studentNameInTbl);
+    tblRow.append(directionInTbl);
+    tblRow.append(birthdayInTbl);
+    tblRow.append(educationYearsInTbl);
+    studentTbl.append(tblRow);
+  }
 
-function renderStudentsTable(studentsArray) {
+  function renderStudentsTable(studentsArray) {
+    const studentTbl = document.getElementById('studentTableBody');
+    while (studentTbl.firstChild) {
+      studentTbl.removeChild(studentTbl.firstChild);
+    }
+    studentsArray.forEach((element) => {
+      getStudentItem(element);
+    });
+  }
 
-}
+  function sortStudentTableBy(studentsArray, prop) {
+    const sortedArray = [...studentsArray];
+    sortedArray.sort((student1, student2) => {
+      if (student1[prop] < student2[prop]) {
+        return -1;
+      }
+      return 1;
+    });
+    renderStudentsTable(sortedArray);
+  }
 
-// Этап 5. К форме добавления студента добавьте слушатель события отправки формы, в котором будет проверка введенных данных.Если проверка пройдет успешно, добавляйте объект с данными студентов в массив студентов и запустите функцию отрисовки таблицы студентов, созданную на этапе 4.
+  function sortStudentTableByName(studentsArray) {
+    // studentsArray.forEach((studentObj) => {
+    //   studentObj.direction = studentObj.direction.toUpperCase();
+    // });
+    const sortedArray = studentsArray.slice(0);
+    sortedArray.forEach((student) => {
+      student.strToSort = `${student.surname} ${student.studentName} ${student.middleName}`;
+    });
+    sortedArray.sort((student1, student2) => {
+      if (student1.strToSort < student2.strToSort) {
+        return -1;
+      }
+      return 1;
+    });
+    renderStudentsTable(sortedArray);
+  }
 
+  function filterStudentTableByName(studentsArray, value) {
+    let filteredArray = [...studentsArray];
+    filteredArray.forEach((student) => {
+      student.strToFilter = `${student.surname} ${student.studentName} ${student.middleName}`;
+    });
+    filteredArray = filteredArray.filter((student) => student.strToFilter.includes(value));
+    return filteredArray;
+  }
 
-// Этап 5. Создайте функцию сортировки массива студентов и добавьте события кликов на соответствующие колонки.
+  function addStudentObject() {
+    const nameField = document.getElementById('studentName');
+    const surnameField = document.getElementById('studentSurname');
+    const middleNameField = document.getElementById('studentMiddleName');
+    const birthdayDateField = document.getElementById('studentBirthday');
+    const startYearField = document.getElementById('startEducation');
+    const directionField = document.getElementById('direction');
+    if (nameField.value.trim().length === 0) {
+      return 'Введите имя студента';
+    }
+    if (surnameField.value.trim().length === 0) {
+      return 'Введите фамилию студента';
+    }
+    if (middleNameField.value.trim().length === 0) {
+      return 'Введите отчество студента';
+    }
+    if (directionField.value.trim().length === 0) {
+      return 'Введите факультет обучения';
+    }
+    const birthday = birthdayDateField.valueAsDate;
+    if ((birthday < new Date(1900, 0, 1)) || (birthday > Date.now())) {
+      return 'Неверная дата рождения';
+    }
+    const startEducation = new Date(startYearField.value, 8, 1);
+    if ((startEducation < new Date(2000, 0, 1)) || (startEducation > Date.now())) {
+      return 'Неверная дата начала обучения';
+    }
 
-// Этап 6. Создайте функцию фильтрации массива студентов и добавьте события для элементов формы.
+    const student = {
+      studentName: nameField.value.trim(),
+      surname: surnameField.value.trim(),
+      middleName: middleNameField.value.trim(),
+      birthDate: birthday,
+      startEducationDate: startEducation,
+      direction: directionField.value.trim(),
+    };
+
+    getStudentItem(student);
+    studentsList.push(student);
+    return null;
+  }
+
+  function addListneners() {
+    const hint = document.getElementById('studentHint');
+    const inputStudentForm = document.getElementById('inputStudentForm');
+
+    inputStudentForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const retStr = addStudentObject();
+      if (retStr !== null) {
+        hint.textContent = retStr;
+        hint.classList.remove('invisible');
+      } else {
+        hint.textContent = 'Студент добавлен';
+        hint.classList.remove('invisible');
+        setTimeout(() => {
+          hint.classList.add('invisible');
+        }, 3000);
+      }
+    });
+
+    const directionBtn = document.getElementById('directionBtn');
+    directionBtn.addEventListener('click', () => {
+      sortStudentTableBy(studentsList, 'direction');
+    });
+
+    const birthdayBtn = document.getElementById('birthdayBtn');
+    birthdayBtn.addEventListener('click', () => {
+      sortStudentTableBy(studentsList, 'birthDate');
+    });
+
+    const startEducationBtn = document.getElementById('startEducationBtn');
+    startEducationBtn.addEventListener('click', () => {
+      sortStudentTableBy(studentsList, 'startEducationDate');
+    });
+
+    const nameBtn = document.getElementById('nameBtn');
+    nameBtn.addEventListener('click', () => {
+      sortStudentTableByName(studentsList);
+    });
+
+    const inputNameFilter = document.getElementById('inputNameFilter');
+    const inputDirectionFilter = document.getElementById('inputDirectionFilter');
+    const inputStartEducationFilter = document.getElementById('inputStartEducationFilter');
+    const inputEndEducationFilter = document.getElementById('inputEndEducationFilter');
+    const setFilterBtn = document.getElementById('setFilterBtn');
+    const clearFilterBtn = document.getElementById('clearFilterBtn');
+    const filterForm = document.getElementById('filterForm');
+
+    inputNameFilter.addEventListener('input', () => {
+      setTimeout(() => {
+        setFilterBtn.disabled = false;
+        clearFilterBtn.disabled = false;
+        const filter = inputNameFilter.value.trim();
+        if (filter) {
+          renderStudentsTable(filterStudentTableByName(studentsList, filter));
+        } else {
+          renderStudentsTable(studentsList);
+        }
+      }, 3000);
+    });
+
+    inputDirectionFilter.addEventListener('input', () => {
+      setTimeout(() => {
+        setFilterBtn.disabled = false;
+        clearFilterBtn.disabled = false;
+        const filter = inputDirectionFilter.value.trim();
+        if (filter) {
+          const filteredArr = studentsList.filter((student) => student.direction.includes(filter));
+          renderStudentsTable(filteredArr);
+        } else {
+          renderStudentsTable(studentsList);
+        }
+      }, 3000);
+    });
+
+    inputStartEducationFilter.addEventListener('input', () => {
+      setTimeout(() => {
+        setFilterBtn.disabled = false;
+        clearFilterBtn.disabled = false;
+        const filter = inputStartEducationFilter.value.trim();
+        if (filter) {
+          const startEducation = new Date(filter, 8, 1);
+          const filteredArray = studentsList.filter((student) => {
+            const retVal = student.startEducationDate.getTime() === startEducation.getTime();
+            return retVal;
+          });
+          renderStudentsTable(filteredArray);
+        } else {
+          renderStudentsTable(studentsList);
+        }
+      }, 3000);
+    });
+
+    inputEndEducationFilter.addEventListener('input', () => {
+      setTimeout(() => {
+        setFilterBtn.disabled = false;
+        clearFilterBtn.disabled = false;
+        const filter = inputEndEducationFilter.value.trim();
+        if (filter) {
+          const filteredArray = studentsList.filter((student) => {
+            const EndEducationYear = student.startEducationDate.getFullYear() + 4;
+            return EndEducationYear === parseInt(filter, 10);
+          });
+          renderStudentsTable(filteredArray);
+        } else {
+          renderStudentsTable(studentsList);
+        }
+      }, 3000);
+    });
+
+    filterForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      let filteredArray = [...studentsList];
+      const nameFilter = inputNameFilter.value.trim();
+      if (nameFilter) {
+        filteredArray = filterStudentTableByName(filteredArray, nameFilter);
+      }
+
+      const directionFilter = inputDirectionFilter.value.trim();
+      if (directionFilter) {
+        filteredArray = filteredArray.filter((student) => {
+          const retVal = student.direction.includes(directionFilter);
+          return retVal;
+        });
+      }
+
+      const startEducationFilter = inputStartEducationFilter.value.trim();
+      if (startEducationFilter) {
+        const startEducation = new Date(startEducationFilter, 8, 1);
+        filteredArray = filteredArray.filter((student) => {
+          const retVal = student.startEducationDate.getTime() === startEducation.getTime();
+          return retVal;
+        });
+      }
+
+      const endEducationFilter = inputEndEducationFilter.value.trim();
+      if (endEducationFilter) {
+        filteredArray = filteredArray.filter((student) => {
+          const EndEducationYear = student.startEducationDate.getFullYear() + 4;
+          return EndEducationYear === parseInt(endEducationFilter, 10);
+        });
+      }
+
+      renderStudentsTable(filteredArray);
+    });
+
+    filterForm.addEventListener('reset', () => {
+      // e.preventDefault();
+      setFilterBtn.disabled = true;
+      clearFilterBtn.disabled = true;
+      renderStudentsTable(studentsList);
+    });
+  }
+
+  document.addEventListener('DOMContentLoader', addListneners());
+})();
