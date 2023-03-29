@@ -82,23 +82,19 @@
     });
   }
 
-  // async function getStudentsArray() {
-  //   let retVal;
-  //   fetch('http://localhost:3000/api/students').then((response) => {
-  //     response.json().then((recieved) => {
-  //       retVal = recieved;
-  //     });
-  //   });
-  //   return retVal;
-  // }
+  async function getStudentsArray() {
+    const response = await fetch('http://localhost:3000/api/students');
+    const retVal = await response.json();
+    return retVal;
+  }
 
   // ---------------------------------------Add all students item in table--------------------------
   async function renderStudentsTable(studentsArray = null) {
     let mainArray = [];
     if (studentsArray === null) {
-      const response = await fetch('http://localhost:3000/api/students');
-      mainArray = await response.json();
-      // mainArray = getStudentsArray();
+      // const response = await fetch('http://localhost:3000/api/students');
+      // mainArray = await response.json();
+      mainArray = await getStudentsArray();
     } else {
       mainArray = [...studentsArray];
     }
@@ -116,8 +112,9 @@
 
   // ---------------------------------------Sort functions------------------------------------------
   async function sortStudentTableBy(prop) {
-    const response = await fetch('http://localhost:3000/api/students');
-    const sortedArray = await response.json();
+    // const response = await fetch('http://localhost:3000/api/students');
+    // const sortedArray = await response.json();
+    const sortedArray = await getStudentsArray();
     sortedArray.sort((student1, student2) => {
       if (student1[prop] < student2[prop]) {
         return -1;
@@ -128,8 +125,9 @@
   }
 
   async function sortStudentTableByDay(prop) {
-    const response = await fetch('http://localhost:3000/api/students');
-    const sortedArray = await response.json();
+    // const response = await fetch('http://localhost:3000/api/students');
+    // const sortedArray = await response.json();
+    const sortedArray = await getStudentsArray();
     sortedArray.sort((student1, student2) => {
       const birthday1 = new Date(student1[prop]);
       const birthday2 = new Date(student2[prop]);
@@ -142,8 +140,9 @@
   }
 
   async function sortStudentTableByName() {
-    const response = await fetch('http://localhost:3000/api/students');
-    const sortedArray = await response.json();
+    // const response = await fetch('http://localhost:3000/api/students');
+    // const sortedArray = await response.json();
+    const sortedArray = await getStudentsArray();
     sortedArray.forEach((student) => {
       student.strToSort = `${student.surname} ${student.name} ${student.lastname}`;
     });
@@ -162,8 +161,9 @@
     if (studentsArray) {
       filteredArray = [...studentsArray];
     } else {
-      const response = await fetch('http://localhost:3000/api/students');
-      filteredArray = await response.json();
+      // const response = await fetch('http://localhost:3000/api/students');
+      // filteredArray = await response.json();
+      filteredArray = await getStudentsArray();
     }
 
     filteredArray.forEach((student) => {
@@ -178,8 +178,9 @@
     if (studentsArray) {
       filteredArray = [...studentsArray];
     } else {
-      const response = await fetch('http://localhost:3000/api/students');
-      filteredArray = await response.json();
+      // const response = await fetch('http://localhost:3000/api/students');
+      // filteredArray = await response.json();
+      filteredArray = await getStudentsArray();
     }
 
     filteredArray = filteredArray.filter((student) => student.faculty.includes(value));
@@ -191,8 +192,9 @@
     if (studentsArray) {
       filteredArray = [...studentsArray];
     } else {
-      const response = await fetch('http://localhost:3000/api/students');
-      filteredArray = await response.json();
+      // const response = await fetch('http://localhost:3000/api/students');
+      // filteredArray = await response.json();
+      filteredArray = await getStudentsArray();
     }
 
     const startEducation = new Date(value, 8, 1);
@@ -209,8 +211,9 @@
     if (studentsArray) {
       filteredArray = [...studentsArray];
     } else {
-      const response = await fetch('http://localhost:3000/api/students');
-      filteredArray = await response.json();
+      // const response = await fetch('http://localhost:3000/api/students');
+      // filteredArray = await response.json();
+      filteredArray = await getStudentsArray();
     }
 
     filteredArray = filteredArray.filter((student) => {
