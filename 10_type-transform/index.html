@@ -37,13 +37,14 @@
       <div class="form-group row">
         <label for="studentMiddleName" class="col-sm-5 col-form-label">Отчество студента</label>
         <div class="col-sm-7">
-          <input type="text" class="form-control" id="studentMiddleName" placeholder="Иванович"
-            required></div>
+          <input type="text" class="form-control" id="studentMiddleName" placeholder="Иванович" required>
+        </div>
       </div>
       <div class="form-group row">
         <label for="studentBirthday" class="col-sm-5 col-form-label">Дата рождения студента</label>
         <div class="col-sm-7">
-          <input type="date" class="form-control" id="studentBirthday" required></div>
+          <input type="date" class="form-control" id="studentBirthday" required>
+        </div>
       </div>
       <div class="form-group row">
         <label for="startEducation" class="col-sm-5 col-form-label">Год начала обучения</label>
@@ -58,7 +59,8 @@
         </div>
       </div>
       <small id="studentHint" class="form-text text-muted text-center invisible">Все поля должны быть заполнены</small>
-      <button id="addStudentBtn" type="submit" class="btn btn-lg btn-outline-secondary d-block mx-auto">Ввод</button>
+      <button id="addStudentBtn" type="submit" class="btn btn-lg btn-outline-secondary d-block mx-auto">Добавить
+        студента</button>
     </form>
 
     <h2 class="text-center">Результирующая таблица</h2>
@@ -97,8 +99,8 @@
       <div class="form-group row">
         <div class="col-sm-12">
           <div class="btn-toolbar flex-sm-row-reverse" role="toolbar">
-            <button type="submit" class="btn btn-outline-secondary btn-sm mr-5 mr-sm-0 ml-sm-5"
-              id="setFilterBtn" disabled>Применить</button>
+            <button type="submit" class="btn btn-outline-secondary btn-sm mr-5 mr-sm-0 ml-sm-5" id="setFilterBtn"
+              disabled>Применить</button>
             <button type="reset" class="btn btn-outline-secondary btn-sm" id="clearFilterBtn" disabled>Сбросить</button>
           </div>
         </div>
@@ -124,26 +126,10 @@
         </tr>
       </thead>
       <tbody id="studentTableBody">
-        <!-- <tr>
-                <th scope="row">1</th>
-                <td>Mark</td>
-                <td>Otto</td>
-                <td>@mdo</td>
-              </tr>
-              <tr>
-                <th scope="row">2</th>
-                <td>Jacob</td>
-                <td>Thornton</td>
-                <td>@fat</td>
-              </tr>
-              <tr>
-                <th scope="row">3</th>
-                <td>Larry</td>
-                <td>the Bird</td>
-                <td>@twitter</td>
-              </tr> -->
       </tbody>
     </table>
+    <button id="deleteStudentBtn" type="submit" class="btn btn-lg btn-outline-secondary d-block mx-auto" disabled>Удалить
+      студента</button>
   </div>
 </body>
 

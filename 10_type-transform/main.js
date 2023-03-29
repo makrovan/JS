@@ -1,5 +1,8 @@
 (() => {
   const studentsList = [];
+  // student's ids to delete:
+  const markedStudentIdList = [];
+  let idForGen = 0;
 
   // const student = {
   //   studentName: nameField.value.trim(),
@@ -8,8 +11,10 @@
   //   birthDate: birthday,
   //   startEducationDate: startEducation,
   //   direction: directionField.value.trim(),
+  //   id: id,
   // };
 
+  // ---------------------------------------Calculate age function----------------------------------
   function getAge(birthday) {
     const today = new Date();
     let years = today.getFullYear() - birthday.getFullYear();
@@ -18,6 +23,7 @@
     return years;
   }
 
+  // ---------------------------------------Calculate student course function-----------------------
   function getEducationYearsStr(startEducation) {
     // const educationYears = getAge(startEducation);
     const today = new Date();
@@ -33,12 +39,20 @@
     return educationYearsStr;
   }
 
+  // ---------------------------------------Add student item in table-------------------------------
   function getStudentItem(studentObj) {
     const studentTbl = document.getElementById('studentTableBody');
     const tblRow = document.createElement('tr');
 
     const studentNameInTbl = document.createElement('td');
-    studentNameInTbl.textContent = `${studentObj.surname} ${studentObj.studentName} ${studentObj.middleName}`;
+    const studentNameBtnInTbl = document.createElement('button');
+    const btnId = `getStudentBtn + ${studentObj.id}`;
+    studentNameBtnInTbl.setAttribute('id', btnId);
+    studentNameBtnInTbl.setAttribute('type', 'button');
+    studentNameBtnInTbl.classList.add('btn', 'btn-link', 'text-secondary', 'p-0', 'font-weight-bold');
+    studentNameBtnInTbl.textContent = `${studentObj.surname} ${studentObj.studentName} ${studentObj.middleName}`;
+    studentNameInTbl.append(studentNameBtnInTbl);
+
     const directionInTbl = document.createElement('td');
     directionInTbl.textContent = studentObj.direction;
     const age = getAge(studentObj.birthDate);
@@ -52,18 +66,47 @@
     tblRow.append(birthdayInTbl);
     tblRow.append(educationYearsInTbl);
     studentTbl.append(tblRow);
+
+    // ------------------------------------Mark student to delete-----------------------------------
+    // const getStudentBtn = document.getElementById(btnId);
+    const deleteStudentBtn = document.getElementById('deleteStudentBtn');
+    studentNameBtnInTbl.addEventListener('click', () => {
+      // add or remove id from markedStudentIdList (array to delete)
+      if (studentNameBtnInTbl.classList.contains('text-secondary')) {
+        markedStudentIdList.push(studentObj.id);
+        deleteStudentBtn.disabled = false;
+      } else {
+        const index = markedStudentIdList.indexOf(studentObj.id);
+        if (index !== -1) {
+          markedStudentIdList.splice(index, 1);
+        }
+        if (markedStudentIdList.length === 0) {
+          deleteStudentBtn.disabled = true;
+        }
+      }
+
+      tblRow.classList.toggle('bg-secondary');
+      tblRow.classList.toggle('text-light');
+      studentNameBtnInTbl.classList.toggle('text-secondary');
+      studentNameBtnInTbl.classList.toggle('text-light');
+    });
   }
 
+  // ---------------------------------------Add all students item in table--------------------------
   function renderStudentsTable(studentsArray) {
     const studentTbl = document.getElementById('studentTableBody');
+    const deleteStudentBtn = document.getElementById('deleteStudentBtn');
     while (studentTbl.firstChild) {
       studentTbl.removeChild(studentTbl.firstChild);
     }
     studentsArray.forEach((element) => {
       getStudentItem(element);
     });
+    markedStudentIdList.splice(0, markedStudentIdList.length);
+    deleteStudentBtn.disabled = true;
   }
 
+  // ---------------------------------------Sort functions------------------------------------------
   function sortStudentTableBy(studentsArray, prop) {
     const sortedArray = [...studentsArray];
     sortedArray.sort((student1, student2) => {
@@ -72,13 +115,10 @@
       }
       return 1;
     });
-    renderStudentsTable(sortedArray);
+    return sortedArray;
   }
 
   function sortStudentTableByName(studentsArray) {
-    // studentsArray.forEach((studentObj) => {
-    //   studentObj.direction = studentObj.direction.toUpperCase();
-    // });
     const sortedArray = studentsArray.slice(0);
     sortedArray.forEach((student) => {
       student.strToSort = `${student.surname} ${student.studentName} ${student.middleName}`;
@@ -89,9 +129,10 @@
       }
       return 1;
     });
-    renderStudentsTable(sortedArray);
+    return sortedArray;
   }
 
+  // ---------------------------------------Filter functions----------------------------------------
   function filterStudentTableByName(studentsArray, value) {
     let filteredArray = [...studentsArray];
     filteredArray.forEach((student) => {
@@ -101,6 +142,29 @@
     return filteredArray;
   }
 
+  function filterStudentTableByDirection(studentsArray, value) {
+    const filteredArr = studentsArray.filter((student) => student.direction.includes(value));
+    return filteredArr;
+  }
+
+  function filterStudentTableByStartEducation(studentsArray, value) {
+    const startEducation = new Date(value, 8, 1);
+    const filteredArray = studentsArray.filter((student) => {
+      const retVal = student.startEducationDate.getTime() === startEducation.getTime();
+      return retVal;
+    });
+    return filteredArray;
+  }
+
+  function filterStudentTableByEndEducation(studentsArray, value) {
+    const filteredArray = studentsArray.filter((student) => {
+      const EndEducationYear = student.startEducationDate.getFullYear() + 4;
+      return EndEducationYear === parseInt(value, 10);
+    });
+    return filteredArray;
+  }
+
+  // ---------------------------------------Add new student function--------------------------------
   function addStudentObject() {
     const nameField = document.getElementById('studentName');
     const surnameField = document.getElementById('studentSurname');
@@ -136,17 +200,19 @@
       birthDate: birthday,
       startEducationDate: startEducation,
       direction: directionField.value.trim(),
+      id: idForGen++,
     };
 
-    getStudentItem(student);
     studentsList.push(student);
     return null;
   }
 
+  // ---------------------------------------Initialize function-------------------------------------
   function addListneners() {
     const hint = document.getElementById('studentHint');
     const inputStudentForm = document.getElementById('inputStudentForm');
 
+    // ---------------------------------------Add---------------------------------------
     inputStudentForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const retStr = addStudentObject();
@@ -154,6 +220,7 @@
         hint.textContent = retStr;
         hint.classList.remove('invisible');
       } else {
+        getStudentItem(studentsList[studentsList.length - 1], studentsList.length - 1);
         hint.textContent = 'Студент добавлен';
         hint.classList.remove('invisible');
         setTimeout(() => {
@@ -162,26 +229,28 @@
       }
     });
 
+    // ---------------------------------------Sort---------------------------------------
     const directionBtn = document.getElementById('directionBtn');
     directionBtn.addEventListener('click', () => {
-      sortStudentTableBy(studentsList, 'direction');
+      renderStudentsTable(sortStudentTableBy(studentsList, 'direction'));
     });
 
     const birthdayBtn = document.getElementById('birthdayBtn');
     birthdayBtn.addEventListener('click', () => {
-      sortStudentTableBy(studentsList, 'birthDate');
+      renderStudentsTable(sortStudentTableBy(studentsList, 'birthDate'));
     });
 
     const startEducationBtn = document.getElementById('startEducationBtn');
     startEducationBtn.addEventListener('click', () => {
-      sortStudentTableBy(studentsList, 'startEducationDate');
+      renderStudentsTable(sortStudentTableBy(studentsList, 'startEducationDate'));
     });
 
     const nameBtn = document.getElementById('nameBtn');
     nameBtn.addEventListener('click', () => {
-      sortStudentTableByName(studentsList);
+      renderStudentsTable(sortStudentTableByName(studentsList));
     });
 
+    // ---------------------------------------Filter---------------------------------------
     const inputNameFilter = document.getElementById('inputNameFilter');
     const inputDirectionFilter = document.getElementById('inputDirectionFilter');
     const inputStartEducationFilter = document.getElementById('inputStartEducationFilter');
@@ -209,8 +278,7 @@
         clearFilterBtn.disabled = false;
         const filter = inputDirectionFilter.value.trim();
         if (filter) {
-          const filteredArr = studentsList.filter((student) => student.direction.includes(filter));
-          renderStudentsTable(filteredArr);
+          renderStudentsTable(filterStudentTableByDirection(studentsList, filter));
         } else {
           renderStudentsTable(studentsList);
         }
@@ -223,12 +291,7 @@
         clearFilterBtn.disabled = false;
         const filter = inputStartEducationFilter.value.trim();
         if (filter) {
-          const startEducation = new Date(filter, 8, 1);
-          const filteredArray = studentsList.filter((student) => {
-            const retVal = student.startEducationDate.getTime() === startEducation.getTime();
-            return retVal;
-          });
-          renderStudentsTable(filteredArray);
+          renderStudentsTable(filterStudentTableByStartEducation(studentsList, filter));
         } else {
           renderStudentsTable(studentsList);
         }
@@ -241,11 +304,7 @@
         clearFilterBtn.disabled = false;
         const filter = inputEndEducationFilter.value.trim();
         if (filter) {
-          const filteredArray = studentsList.filter((student) => {
-            const EndEducationYear = student.startEducationDate.getFullYear() + 4;
-            return EndEducationYear === parseInt(filter, 10);
-          });
-          renderStudentsTable(filteredArray);
+          renderStudentsTable(filterStudentTableByEndEducation(studentsList, filter));
         } else {
           renderStudentsTable(studentsList);
         }
@@ -255,6 +314,7 @@
     filterForm.addEventListener('submit', (e) => {
       e.preventDefault();
       let filteredArray = [...studentsList];
+
       const nameFilter = inputNameFilter.value.trim();
       if (nameFilter) {
         filteredArray = filterStudentTableByName(filteredArray, nameFilter);
@@ -262,39 +322,38 @@
 
       const directionFilter = inputDirectionFilter.value.trim();
       if (directionFilter) {
-        filteredArray = filteredArray.filter((student) => {
-          const retVal = student.direction.includes(directionFilter);
-          return retVal;
-        });
+        filteredArray = filterStudentTableByDirection(filteredArray, directionFilter);
       }
 
       const startEducationFilter = inputStartEducationFilter.value.trim();
       if (startEducationFilter) {
-        const startEducation = new Date(startEducationFilter, 8, 1);
-        filteredArray = filteredArray.filter((student) => {
-          const retVal = student.startEducationDate.getTime() === startEducation.getTime();
-          return retVal;
-        });
+        filteredArray = filterStudentTableByStartEducation(filteredArray, startEducationFilter);
       }
 
       const endEducationFilter = inputEndEducationFilter.value.trim();
       if (endEducationFilter) {
-        filteredArray = filteredArray.filter((student) => {
-          const EndEducationYear = student.startEducationDate.getFullYear() + 4;
-          return EndEducationYear === parseInt(endEducationFilter, 10);
-        });
+        filteredArray = filterStudentTableByEndEducation(filteredArray, endEducationFilter);
       }
 
       renderStudentsTable(filteredArray);
     });
 
     filterForm.addEventListener('reset', () => {
-      // e.preventDefault();
       setFilterBtn.disabled = true;
       clearFilterBtn.disabled = true;
       renderStudentsTable(studentsList);
     });
   }
+
+  // ---------------------------------------Remove student------------------------------------------
+  const deleteStudentBtn = document.getElementById('deleteStudentBtn');
+  deleteStudentBtn.addEventListener('click', () => {
+    markedStudentIdList.forEach((id) => {
+      const studendIndexToDele = studentsList.findIndex((student) => student.id === id);
+      studentsList.splice(studendIndexToDele, 1);
+    });
+    renderStudentsTable(studentsList);
+  });
 
   document.addEventListener('DOMContentLoader', addListneners());
 })();
