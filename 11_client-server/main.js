@@ -1,18 +1,6 @@
 (() => {
-  const studentsList = [];
   // student's ids to delete:
   const markedStudentIdList = [];
-  let idForGen = 0;
-
-  // const student = {
-  //   studentName: nameField.value.trim(),
-  //   surname: surnameField.value.trim(),
-  //   middleName: middleNameField.value.trim(),
-  //   birthDate: birthday,
-  //   startEducationDate: startEducation,
-  //   direction: directionField.value.trim(),
-  //   id: id,
-  // };
 
   // ---------------------------------------Calculate age function----------------------------------
   function getAge(birthday) {
@@ -46,20 +34,22 @@
 
     const studentNameInTbl = document.createElement('td');
     const studentNameBtnInTbl = document.createElement('button');
-    const btnId = `getStudentBtn + ${studentObj.id}`;
+    const btnId = `getStudentBtn${studentObj.id}`;
     studentNameBtnInTbl.setAttribute('id', btnId);
     studentNameBtnInTbl.setAttribute('type', 'button');
     studentNameBtnInTbl.classList.add('btn', 'btn-link', 'text-secondary', 'p-0', 'font-weight-bold');
-    studentNameBtnInTbl.textContent = `${studentObj.surname} ${studentObj.studentName} ${studentObj.middleName}`;
+    studentNameBtnInTbl.textContent = `${studentObj.surname} ${studentObj.name} ${studentObj.lastname}`;
     studentNameInTbl.append(studentNameBtnInTbl);
 
     const directionInTbl = document.createElement('td');
-    directionInTbl.textContent = studentObj.direction;
-    const age = getAge(studentObj.birthDate);
+    directionInTbl.textContent = studentObj.faculty;
+    const birthDate = new Date(studentObj.birthday);
+    const age = getAge(birthDate);
     const birthdayInTbl = document.createElement('td');
-    birthdayInTbl.textContent = `${studentObj.birthDate.toLocaleDateString()} (${age} лет)`;
+    birthdayInTbl.textContent = `${birthDate.toLocaleDateString()} (${age} лет)`;
     const educationYearsInTbl = document.createElement('td');
-    educationYearsInTbl.textContent = getEducationYearsStr(studentObj.startEducationDate);
+    const studyStartDate = new Date(studentObj.studyStart);
+    educationYearsInTbl.textContent = getEducationYearsStr(studyStartDate);
 
     tblRow.append(studentNameInTbl);
     tblRow.append(directionInTbl);
@@ -92,14 +82,28 @@
     });
   }
 
+  async function getStudentsArray() {
+    const response = await fetch('http://localhost:3000/api/students');
+    const retVal = await response.json();
+    return retVal;
+  }
+
   // ---------------------------------------Add all students item in table--------------------------
-  function renderStudentsTable(studentsArray) {
+  async function renderStudentsTable(studentsArray = null) {
+    let mainArray = [];
+    if (studentsArray === null) {
+      // const response = await fetch('http://localhost:3000/api/students');
+      // mainArray = await response.json();
+      mainArray = await getStudentsArray();
+    } else {
+      mainArray = [...studentsArray];
+    }
     const studentTbl = document.getElementById('studentTableBody');
     const deleteStudentBtn = document.getElementById('deleteStudentBtn');
     while (studentTbl.firstChild) {
       studentTbl.removeChild(studentTbl.firstChild);
     }
-    studentsArray.forEach((element) => {
+    mainArray.forEach((element) => {
       getStudentItem(element);
     });
     markedStudentIdList.splice(0, markedStudentIdList.length);
@@ -107,8 +111,10 @@
   }
 
   // ---------------------------------------Sort functions------------------------------------------
-  function sortStudentTableBy(studentsArray, prop) {
-    const sortedArray = [...studentsArray];
+  async function sortStudentTableBy(prop) {
+    // const response = await fetch('http://localhost:3000/api/students');
+    // const sortedArray = await response.json();
+    const sortedArray = await getStudentsArray();
     sortedArray.sort((student1, student2) => {
       if (student1[prop] < student2[prop]) {
         return -1;
@@ -118,10 +124,27 @@
     return sortedArray;
   }
 
-  function sortStudentTableByName(studentsArray) {
-    const sortedArray = studentsArray.slice(0);
+  async function sortStudentTableByDay(prop) {
+    // const response = await fetch('http://localhost:3000/api/students');
+    // const sortedArray = await response.json();
+    const sortedArray = await getStudentsArray();
+    sortedArray.sort((student1, student2) => {
+      const birthday1 = new Date(student1[prop]);
+      const birthday2 = new Date(student2[prop]);
+      if (birthday1 < birthday2) {
+        return -1;
+      }
+      return 1;
+    });
+    return sortedArray;
+  }
+
+  async function sortStudentTableByName() {
+    // const response = await fetch('http://localhost:3000/api/students');
+    // const sortedArray = await response.json();
+    const sortedArray = await getStudentsArray();
     sortedArray.forEach((student) => {
-      student.strToSort = `${student.surname} ${student.studentName} ${student.middleName}`;
+      student.strToSort = `${student.surname} ${student.name} ${student.lastname}`;
     });
     sortedArray.sort((student1, student2) => {
       if (student1.strToSort < student2.strToSort) {
@@ -133,94 +156,137 @@
   }
 
   // ---------------------------------------Filter functions----------------------------------------
-  function filterStudentTableByName(studentsArray, value) {
-    let filteredArray = [...studentsArray];
+  async function filterStudentTableByName(value, studentsArray = null) {
+    let filteredArray;
+    if (studentsArray) {
+      filteredArray = [...studentsArray];
+    } else {
+      // const response = await fetch('http://localhost:3000/api/students');
+      // filteredArray = await response.json();
+      filteredArray = await getStudentsArray();
+    }
+
     filteredArray.forEach((student) => {
-      student.strToFilter = `${student.surname} ${student.studentName} ${student.middleName}`;
+      student.strToFilter = `${student.surname} ${student.name} ${student.lastname}`;
     });
     filteredArray = filteredArray.filter((student) => student.strToFilter.includes(value));
     return filteredArray;
   }
 
-  function filterStudentTableByDirection(studentsArray, value) {
-    const filteredArr = studentsArray.filter((student) => student.direction.includes(value));
-    return filteredArr;
+  async function filterStudentTableByDirection(value, studentsArray = null) {
+    let filteredArray;
+    if (studentsArray) {
+      filteredArray = [...studentsArray];
+    } else {
+      // const response = await fetch('http://localhost:3000/api/students');
+      // filteredArray = await response.json();
+      filteredArray = await getStudentsArray();
+    }
+
+    filteredArray = filteredArray.filter((student) => student.faculty.includes(value));
+    return filteredArray;
   }
 
-  function filterStudentTableByStartEducation(studentsArray, value) {
+  async function filterStudentTableByStartEducation(value, studentsArray = null) {
+    let filteredArray;
+    if (studentsArray) {
+      filteredArray = [...studentsArray];
+    } else {
+      // const response = await fetch('http://localhost:3000/api/students');
+      // filteredArray = await response.json();
+      filteredArray = await getStudentsArray();
+    }
+
     const startEducation = new Date(value, 8, 1);
-    const filteredArray = studentsArray.filter((student) => {
-      const retVal = student.startEducationDate.getTime() === startEducation.getTime();
+    filteredArray = filteredArray.filter((student) => {
+      student.studyStart = new Date(student.studyStart);
+      const retVal = student.studyStart.getTime() === startEducation.getTime();
       return retVal;
     });
     return filteredArray;
   }
 
-  function filterStudentTableByEndEducation(studentsArray, value) {
-    const filteredArray = studentsArray.filter((student) => {
-      const EndEducationYear = student.startEducationDate.getFullYear() + 4;
+  async function filterStudentTableByEndEducation(value, studentsArray = null) {
+    let filteredArray;
+    if (studentsArray) {
+      filteredArray = [...studentsArray];
+    } else {
+      // const response = await fetch('http://localhost:3000/api/students');
+      // filteredArray = await response.json();
+      filteredArray = await getStudentsArray();
+    }
+
+    filteredArray = filteredArray.filter((student) => {
+      student.studyStart = new Date(student.studyStart);
+      const EndEducationYear = student.studyStart.getFullYear() + 4;
       return EndEducationYear === parseInt(value, 10);
     });
     return filteredArray;
   }
 
   // ---------------------------------------Add new student function--------------------------------
-  function addStudentObject() {
+  async function addStudentObject() {
     const nameField = document.getElementById('studentName');
     const surnameField = document.getElementById('studentSurname');
     const middleNameField = document.getElementById('studentMiddleName');
     const birthdayDateField = document.getElementById('studentBirthday');
     const startYearField = document.getElementById('startEducation');
     const directionField = document.getElementById('direction');
-    if (nameField.value.trim().length === 0) {
-      return 'Введите имя студента';
-    }
-    if (surnameField.value.trim().length === 0) {
-      return 'Введите фамилию студента';
-    }
-    if (middleNameField.value.trim().length === 0) {
-      return 'Введите отчество студента';
-    }
-    if (directionField.value.trim().length === 0) {
-      return 'Введите факультет обучения';
-    }
-    const birthday = birthdayDateField.valueAsDate;
-    if ((birthday < new Date(1900, 0, 1)) || (birthday > Date.now())) {
-      return 'Неверная дата рождения';
-    }
+    const birthdate = birthdayDateField.valueAsDate;
     const startEducation = new Date(startYearField.value, 8, 1);
-    if ((startEducation < new Date(2000, 0, 1)) || (startEducation > Date.now())) {
-      return 'Неверная дата начала обучения';
+    let retVal = null;
+    let errString = null;
+    if (nameField.value.trim().length === 0) {
+      errString = 'Введите имя студента';
+    } else if (surnameField.value.trim().length === 0) {
+      errString = 'Введите фамилию студента';
+    } else if (middleNameField.value.trim().length === 0) {
+      errString = 'Введите отчество студента';
+    } else if (directionField.value.trim().length === 0) {
+      errString = 'Введите факультет обучения';
+    } else if ((birthdate < new Date(1900, 0, 1)) || (birthdate > Date.now())) {
+      errString = 'Неверная дата рождения';
+    } else if ((startEducation < new Date(2000, 0, 1)) || (startEducation > Date.now())) {
+      errString = 'Неверная дата начала обучения';
+    } else {
+      const response = await fetch('http://localhost:3000/api/students', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: nameField.value.trim(),
+          surname: surnameField.value.trim(),
+          lastname: middleNameField.value.trim(),
+          birthday: birthdate.toJSON(),
+          studyStart: startEducation.toJSON(),
+          faculty: directionField.value.trim(),
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      retVal = await response.json();
     }
 
-    const student = {
-      studentName: nameField.value.trim(),
-      surname: surnameField.value.trim(),
-      middleName: middleNameField.value.trim(),
-      birthDate: birthday,
-      startEducationDate: startEducation,
-      direction: directionField.value.trim(),
-      id: idForGen++,
+    return {
+      retVal,
+      errString,
     };
-
-    studentsList.push(student);
-    return null;
   }
 
   // ---------------------------------------Initialize function-------------------------------------
   function addListneners() {
+    renderStudentsTable();
     const hint = document.getElementById('studentHint');
     const inputStudentForm = document.getElementById('inputStudentForm');
 
     // ---------------------------------------Add---------------------------------------
-    inputStudentForm.addEventListener('submit', (e) => {
+    inputStudentForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const retStr = addStudentObject();
-      if (retStr !== null) {
-        hint.textContent = retStr;
+      const retObj = await addStudentObject();
+      if (retObj.errString !== null) {
+        hint.textContent = retObj.errString;
         hint.classList.remove('invisible');
       } else {
-        getStudentItem(studentsList[studentsList.length - 1], studentsList.length - 1);
+        getStudentItem(retObj.retVal);
         hint.textContent = 'Студент добавлен';
         hint.classList.remove('invisible');
         setTimeout(() => {
@@ -232,22 +298,30 @@
     // ---------------------------------------Sort---------------------------------------
     const directionBtn = document.getElementById('directionBtn');
     directionBtn.addEventListener('click', () => {
-      renderStudentsTable(sortStudentTableBy(studentsList, 'direction'));
+      sortStudentTableBy('faculty').then((sortedArray) => {
+        renderStudentsTable(sortedArray);
+      });
     });
 
     const birthdayBtn = document.getElementById('birthdayBtn');
     birthdayBtn.addEventListener('click', () => {
-      renderStudentsTable(sortStudentTableBy(studentsList, 'birthDate'));
+      sortStudentTableByDay('birthday').then((sortedArray) => {
+        renderStudentsTable(sortedArray);
+      });
     });
 
     const startEducationBtn = document.getElementById('startEducationBtn');
     startEducationBtn.addEventListener('click', () => {
-      renderStudentsTable(sortStudentTableBy(studentsList, 'startEducationDate'));
+      sortStudentTableByDay('studyStart').then((sortedArray) => {
+        renderStudentsTable(sortedArray);
+      });
     });
 
     const nameBtn = document.getElementById('nameBtn');
     nameBtn.addEventListener('click', () => {
-      renderStudentsTable(sortStudentTableByName(studentsList));
+      sortStudentTableByName().then((sortedArray) => {
+        renderStudentsTable(sortedArray);
+      });
     });
 
     // ---------------------------------------Filter---------------------------------------
@@ -265,9 +339,11 @@
         clearFilterBtn.disabled = false;
         const filter = inputNameFilter.value.trim();
         if (filter) {
-          renderStudentsTable(filterStudentTableByName(studentsList, filter));
+          filterStudentTableByName(filter).then((filteredArray) => {
+            renderStudentsTable(filteredArray);
+          });
         } else {
-          renderStudentsTable(studentsList);
+          renderStudentsTable();
         }
       }, 3000);
     });
@@ -278,9 +354,11 @@
         clearFilterBtn.disabled = false;
         const filter = inputDirectionFilter.value.trim();
         if (filter) {
-          renderStudentsTable(filterStudentTableByDirection(studentsList, filter));
+          filterStudentTableByDirection(filter).then((filteredArray) => {
+            renderStudentsTable(filteredArray);
+          });
         } else {
-          renderStudentsTable(studentsList);
+          renderStudentsTable();
         }
       }, 3000);
     });
@@ -291,9 +369,11 @@
         clearFilterBtn.disabled = false;
         const filter = inputStartEducationFilter.value.trim();
         if (filter) {
-          renderStudentsTable(filterStudentTableByStartEducation(studentsList, filter));
+          filterStudentTableByStartEducation(filter).then((filteredArray) => {
+            renderStudentsTable(filteredArray);
+          });
         } else {
-          renderStudentsTable(studentsList);
+          renderStudentsTable();
         }
       }, 3000);
     });
@@ -304,55 +384,65 @@
         clearFilterBtn.disabled = false;
         const filter = inputEndEducationFilter.value.trim();
         if (filter) {
-          renderStudentsTable(filterStudentTableByEndEducation(studentsList, filter));
+          filterStudentTableByEndEducation(filter).then((filteredArray) => {
+            renderStudentsTable(filteredArray);
+          });
         } else {
-          renderStudentsTable(studentsList);
+          renderStudentsTable();
         }
       }, 3000);
     });
 
-    filterForm.addEventListener('submit', (e) => {
+    filterForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      let filteredArray = [...studentsList];
+      let filteredArray;
 
       const nameFilter = inputNameFilter.value.trim();
       if (nameFilter) {
-        filteredArray = filterStudentTableByName(filteredArray, nameFilter);
+        filteredArray = await filterStudentTableByName(nameFilter, filteredArray);
       }
 
       const directionFilter = inputDirectionFilter.value.trim();
       if (directionFilter) {
-        filteredArray = filterStudentTableByDirection(filteredArray, directionFilter);
+        filteredArray = await filterStudentTableByDirection(directionFilter, filteredArray);
       }
 
       const startEducationFilter = inputStartEducationFilter.value.trim();
       if (startEducationFilter) {
-        filteredArray = filterStudentTableByStartEducation(filteredArray, startEducationFilter);
+        filteredArray = await filterStudentTableByStartEducation(
+          startEducationFilter,
+          filteredArray,
+        );
       }
 
       const endEducationFilter = inputEndEducationFilter.value.trim();
       if (endEducationFilter) {
-        filteredArray = filterStudentTableByEndEducation(filteredArray, endEducationFilter);
+        filteredArray = await filterStudentTableByEndEducation(endEducationFilter, filteredArray);
       }
 
       renderStudentsTable(filteredArray);
     });
 
-    filterForm.addEventListener('reset', () => {
+    filterForm.addEventListener('reset', async () => {
       setFilterBtn.disabled = true;
       clearFilterBtn.disabled = true;
-      renderStudentsTable(studentsList);
+      await renderStudentsTable();
     });
   }
 
   // ---------------------------------------Remove student------------------------------------------
   const deleteStudentBtn = document.getElementById('deleteStudentBtn');
   deleteStudentBtn.addEventListener('click', () => {
-    markedStudentIdList.forEach((id) => {
-      const studendIndexToDele = studentsList.findIndex((student) => student.id === id);
-      studentsList.splice(studendIndexToDele, 1);
+    let count = markedStudentIdList.length;
+    markedStudentIdList.forEach(async (id) => {
+      await fetch(`http://localhost:3000/api/students/${id}`, {
+        method: 'DELETE',
+      }).then(() => {
+        if (--count === 0) {
+          renderStudentsTable();
+        }
+      });
     });
-    renderStudentsTable(studentsList);
   });
 
   document.addEventListener('DOMContentLoader', addListneners());
